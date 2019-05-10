@@ -26,6 +26,8 @@
         <script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js" integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ" crossorigin="anonymous"></script>
     </head>
     <body>
+        <%
+        %>
         <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-secondary">
             <a class="navbar-brand mr-auto mr-lg-0 text-warning" href="index.jsp"><img style="width: 20vw;" src="css/images/PaperManager.svg"></a>
             <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,11 +37,10 @@
             <div class="navbar-collapse offcanvas-collapse" id="navbarsExampleDefault" style="font-size: 2vw">
                 <ul class="navbar-nav mr-auto offset-1">
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="<%=session.getAttribute("name") == null ? "modal" : ""%>" href="<%=session.getAttribute("name") == null ? "#sign-in" : "userlist.jsp"%>"><i class="fas fa-user-circle" style="color: #17a2b8"></i> <%=session.getAttribute("newuser") == null ? "" : "Welcome "%><%=session.getAttribute("name") == null ? "User" : session.getAttribute("name")%></a><% session.removeAttribute(
-                                    "newuser");%></a>
+                        <a class="nav-link active" data-toggle="<%=session.getAttribute("name") == null ? "modal" : ""%>" href="<%=session.getAttribute("name") == null ? "#sign-in" : "#"%>"><i class="fas fa-user-circle" style="color: #17a2b8"></i> <%=session.getAttribute("newuser") == null ? "" : "Welcome "%><%=session.getAttribute("name") == null ? "User" : session.getAttribute("name")%></a><% session.removeAttribute("newuser");%></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="papers.jsp"><i class="fas fa-book-reader"></i> Papers</a>
+                        <a class="nav-link" href="papers.jsp"><i class="fas fa-book-reader"></i> Papers</a>
                     </li>
 
                 </ul>
@@ -54,19 +55,15 @@
             </div>
         </nav>
         <%
+            request.setCharacterEncoding("UTF-8");
 
-            request.setCharacterEncoding(
-                    "UTF-8");
-
-            Class.forName(
-                    "com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.jdbc.Driver");
             Connection conexion = DriverManager.getConnection("jdbc:mysql://localhost:3306/paper", "root", "");
             Statement s = conexion.createStatement();
             String category = "";
             String[] categoryList = {};
             boolean jump = false;
             ResultSet listado;
-
             try {
                 categoryList = request.getParameterValues("category");
             } catch (Exception e) {
@@ -80,11 +77,11 @@
             String query;
             if (!jump) {
                 try {
-                    query = "SELECT * FROM paper ORDER BY " + category + " DESC";
+                    query = "SELECT * FROM paper WHERE IdPap IN (SELECT IdPap FROM clientpaper WHERE IdCli = " + session.getAttribute("id") + ") ORDER BY " + category + " DESC";
                     s.executeQuery(query);
                 } catch (Exception e) {
                     try {
-                        query = "SELECT * FROM paper ORDER BY ";
+                        query = "SELECT * FROM paper WHERE IdPap IN (SELECT IdPap FROM clientpaper WHERE IdCli = " + session.getAttribute("id") + ") ORDER BY ";
                         for (int num = 0; num < categoryList.length; num++) {
                             if (num == categoryList.length - 1) {
                                 query += categoryList[num];
@@ -96,14 +93,14 @@
                         out.println("Este error : " + query + "hola");
                         s.executeQuery(query);
                     } catch (Exception i) {
-                        query = "SELECT * FROM paper";
+                        query = "SELECT * FROM paper WHERE IdPap IN (SELECT IdPap FROM clientpaper WHERE IdCli = " + session.getAttribute("id") + ")";
                     }
                 }
                 listado = s.executeQuery(query);
             } else {
-                listado = s.executeQuery("SELECT * FROM paper");
+                listado = s.executeQuery("SELECT * FROM paper WHERE IdPap IN (SELECT IdPap FROM clientpaper WHERE IdCli = " + session.getAttribute("id") + ")");
             }
-            
+
             
             
             final String countQuery = "SELECT IdPap FROM clientpaper WHERE IdCli = ? ";
@@ -114,9 +111,7 @@
                 session.setAttribute(rs.getString("IdPap"), "notnull");
             }
             ps.close();
-            
-            
-            
+
             Statement c = conexion.createStatement();
             ResultSet papersId = c.executeQuery("SELECT IdPap FROM paper");
             final String countQuery2 = "SELECT COUNT(IdPap) as NUM FROM clientpaper WHERE IdPap = ?";
@@ -131,7 +126,6 @@
                     session.setAttribute("atoms" + Integer.parseInt(papersId.getString("IdPap")), "0");
                 }
             }
-
 
         %>
 
@@ -169,7 +163,7 @@
                                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <input type="hidden" name="actualizarpaper" value="<%=listado.getString("IdPap")%>">
+                                                    <input type="hidden" name="actualizarpaper" value="<%= listado.getString("IdPap")%>">
                                                     <div class="form-group">
                                                         <label>Name</label>
                                                         <textarea type="text" class="form-control" name="NomPap" name="<%= listado.getString("NomPap")%>" required><%= listado.getString("NomPap")%></textarea>
@@ -222,7 +216,6 @@
                         </tr>
                         <%
                             }
-
                             conexion.close();
                         %>
                     </tbody>

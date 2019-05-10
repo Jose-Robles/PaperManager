@@ -23,10 +23,8 @@
           actualizacion += request.getParameter("DesPap");
           actualizacion += "', UrlPap='";
           actualizacion += request.getParameter("UrlPap");
-          actualizacion += " WHERE IdSer=";
+          actualizacion += "' WHERE IdPap=";
           actualizacion += request.getParameter("actualizarpaper");
-
-          //out.print(actualizacion);
           s.execute(actualizacion);
           conexion.close();
         %>

@@ -11,22 +11,25 @@
     </head>
     <body>
         <%
-          request.setCharacterEncoding("UTF-8");
-          
-          Class.forName("com.mysql.jdbc.Driver");
-          Connection conexion = DriverManager.getConnection("jdbc:mysql://localhost:3306/paper", "root", "");
-          Statement s = conexion.createStatement();
+            request.setCharacterEncoding("UTF-8");
 
-          String borrado = "DELETE FROM paper WHERE Idpap=";
-          borrado += request.getParameter("borrarSerie");
-
-          s.execute(borrado);
-          conexion.close();
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection conexion = DriverManager.getConnection("jdbc:mysql://localhost:3306/paper", "root", "");
+            Statement s = conexion.createStatement();
+            try {
+                String borrado = "DELETE FROM paper WHERE Idpap=";
+                borrado += request.getParameter("borrarpaper");
+                s.execute(borrado);
+                response.sendRedirect("papers.jsp");
+            } catch (com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException e) {
+                session.setAttribute("error", "You can't delete a paper wich people currently like and read, in order to do that you must contact with the organizer");
+                response.sendRedirect("index.jsp");
+            } catch (Exception e) {
+                session.setAttribute("error", "Unable to do that, check yourinternet conexion or permissions");
+                response.sendRedirect("index.jsp");
+            }
+            conexion.close();
         %>
 
-        <script>
-            // Redirecciona a la página principal
-            location.replace("papers.jsp");
-        </script>
     </body>
 </html>
